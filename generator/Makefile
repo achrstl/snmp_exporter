@@ -37,6 +37,7 @@ SYNOLOGY_URL     := 'https://global.download.synology.com/download/Document/Soft
 UBNT_AIROS_URL   := https://dl.ubnt.com/firmwares/airos-ubnt-mib/ubnt-mib.zip
 UBNT_DL_URL      := http://dl.ubnt-ut.com/snmp
 RARITAN_URL      := http://cdn.raritan.com/download/PX/v1.5.20/PDU-MIB.txt
+JUNOS_URL				 := https://www.juniper.net/documentation/software/junos/junos194/juniper-mibs-19.4R1.10.zip
 
 .DEFAULT: all
 
@@ -51,6 +52,7 @@ clean:
 		$(MIBDIR)/.net-snmp \
 		$(MIBDIR)/.paloalto_panos \
 		$(MIBDIR)/.synology
+		$(MIBDIR)/.juniper
 
 generator: *.go
 	go build
@@ -93,6 +95,7 @@ mibs: mib-dir \
   $(MIBDIR)/PRINTER-MIB-V2.txt \
   $(MIBDIR)/servertech-sentry3-mib \
   $(MIBDIR)/.synology \
+	$(MIBDIR)/.juniper \
   $(MIBDIR)/UBNT-MIB \
   $(MIBDIR)/UBNT-UniFi-MIB \
   $(MIBDIR)/UBNT-AirMAX-MIB.txt \
@@ -223,3 +226,11 @@ $(MIBDIR)/UBNT-AirMAX-MIB.txt:
 $(MIBDIR)/PDU-MIB.txt:
 	@echo ">> Downloading PDU-MIB"
 	@curl $(CURL_OPTS) -o $(MIBDIR)/PDU-MIB.txt "$(RARITAN_URL)"
+
+$(MIBDIR)/.juniper:
+	$(eval TMP := $(shell mktemp))
+	@echo ">> Downloading juniper to $(TMP)"
+	@curl $(CURL_OPTS) -o $(TMP) $(JUNOS_URL)
+	@unzip -j -d $(MIBDIR) $(TMP)
+	@rm -v $(TMP)
+	@touch $(MIBDIR)/.juniper
